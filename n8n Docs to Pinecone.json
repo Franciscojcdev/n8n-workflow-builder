@@ -1,0 +1,225 @@
+{
+  "name": "n8n Docs to Pinecone",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "d3712502-4f8c-4829-ba63-d1f1010dbbe3",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "jsCode": "const urls = [\n  \"https://docs.n8n.io/integrations/builtin/core-nodes/\",\n  \"https://docs.n8n.io/integrations/builtin/app-nodes/\",\n  \"https://docs.n8n.io/integrations/builtin/trigger-nodes/\",\n  \"https://docs.n8n.io/flow-logic/\",\n  \"https://docs.n8n.io/api/\"\n];\n\nreturn urls.map(url => ({ json: { url } }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "45a4535e-eca3-4c54-bea7-40959cda1c33",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        416,
+        0
+      ],
+      "id": "f2d04f22-3fb6-41ef-9021-3f1862ea3c2f",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "html": "={{ $json.data }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [
+        624,
+        0
+      ],
+      "id": "76ac6c35-79f8-420c-ae56-8c976450fefc",
+      "name": "Markdown"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "n8n-docs",
+          "mode": "list",
+          "cachedResultName": "n8n-docs"
+        },
+        "options": {
+          "clearNamespace": false,
+          "pineconeNamespace": "n8n-docs"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        832,
+        0
+      ],
+      "id": "6c27f29b-0215-4b0e-b513-b12626f3f548",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "S1acWU4ao6rhcIjH",
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "text-embedding-ada-002",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        832,
+        240
+      ],
+      "id": "5c1e0aea-83ff-4dd4-9b79-c7c4c53a3888",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "WFZnAIZVNIScZJtb",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "textSplittingMode": "custom",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        1056,
+        208
+      ],
+      "id": "3df22b87-eeb6-487d-a138-ef65b652b409",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        1056,
+        400
+      ],
+      "id": "64de422b-0f7f-4629-97d9-77d582d47df7",
+      "name": "Recursive Character Text Splitter"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Markdown",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Markdown": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "6ee5d818-23e8-4a1f-a82f-31b358144fe0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "bb8023c0d680f777bd04173a7ef8dad8cbcd1198cc1a2d9f3256c079e9a3a50f"
+  },
+  "id": "S2cUkgnRFhLfvy0G",
+  "tags": []
+}

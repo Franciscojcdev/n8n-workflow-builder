@@ -1,0 +1,300 @@
+{
+  "name": "n8n Workflow Builder",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "👋 Hi! I'm the n8n Workflow Builder.\n\nDescribe the workflow you want to create in plain language and I'll generate and deploy it to your n8n instance automatically.\n\nExample: \"Create a workflow that sends a Telegram message every time a new email arrives in Gmail\"",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "55694d55-ddd3-41e7-9fe2-f7f65fd8d6af",
+      "name": "When chat message received",
+      "webhookId": "f1e89f03-40ca-4026-9f1f-012a80bfac1c"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are an expert n8n workflow builder. Your job is to:\n\n1. Understand the user's workflow requirements\n2. Use the n8n_docs tool to look up available nodes and their configurations\n3. Generate a valid n8n workflow JSON\n4. Use the create_workflow tool to deploy it directly to n8n\n\n## Rules for generating workflows:\n- Always generate valid n8n workflow JSON\n- Use correct node types (e.g. n8n-nodes-base.gmail, n8n-nodes-base.telegram)\n- Always include a trigger node\n- Connect nodes properly in the connections object\n- Set typeVersion to the latest stable version\n- Generate unique IDs for each node using UUID format\n\n## When calling create_workflow:\n- The tool expects a JSON body with the complete workflow object\n- Always wrap the workflow in this structure:\n{\n  \"name\": \"Workflow name\",\n  \"nodes\": [...],\n  \"connections\": {...},\n  \"settings\": {\"executionOrder\": \"v1\"}\n}\n- Confirm with the user what you understood before deploying"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "08250135-533e-4419-ad9c-fa777d441dd3",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-sonnet-4-6",
+          "mode": "list",
+          "cachedResultName": "Claude Sonnet 4.6"
+        },
+        "options": {
+          "thinkingMode": "disabled"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.5,
+      "position": [
+        80,
+        208
+      ],
+      "id": "72c273c8-294c-4ff6-94f0-265ee7e92a39",
+      "name": "Anthropic Chat Model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "UfbHUnXg72lrQWNO",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableName": "workflow_builder_histories",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.4,
+      "position": [
+        224,
+        208
+      ],
+      "id": "98f150dc-6cd9-470f-bd15-aea5bac3eec3",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "XlNMGhgcXuElcppj",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "Use this tool to look up n8n nodes, their configurations, and how to build workflows",
+        "topK": 6
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1.1,
+      "position": [
+        608,
+        224
+      ],
+      "id": "ee3e9264-352b-4510-bca8-f6d741c6abaa",
+      "name": "Answer questions with a vector store"
+    },
+    {
+      "parameters": {
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "n8n-docs",
+          "mode": "list",
+          "cachedResultName": "n8n-docs"
+        },
+        "options": {
+          "pineconeNamespace": "n8n-docs"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        368,
+        400
+      ],
+      "id": "bdc1e1de-e8df-473c-acda-7d971c2b3a68",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "S1acWU4ao6rhcIjH",
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "responsesApiEnabled": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        656,
+        416
+      ],
+      "id": "d5e7bc0b-a51b-4173-9c74-998b8e9aa5f3",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "WFZnAIZVNIScZJtb",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "text-embedding-ada-002",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        368,
+        560
+      ],
+      "id": "03662c36-3cb1-4a9e-8365-cd1aaff973c6",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "WFZnAIZVNIScZJtb",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use this tool to create a workflow in n8n. Input must be a valid n8n workflow JSON",
+        "method": "POST",
+        "url": "https://primary-production-0e1e.up.railway.app/api/v1/workflows",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $fromAI('workflow_json', 'The complete n8n workflow JSON object with name, nodes, connections and settings properties at the root level', 'json') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        368,
+        208
+      ],
+      "id": "b106cde1-6ad6-40e3-83e2-24e061f24bd7",
+      "name": "create_workflow",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "rgocFBjmATVP13uv",
+          "name": "Header Auth account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Answer questions with a vector store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Answer questions with a vector store",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Answer questions with a vector store",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "create_workflow": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "44d15ed2-19f5-4a19-95ec-ca2b6cd62b6c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "bb8023c0d680f777bd04173a7ef8dad8cbcd1198cc1a2d9f3256c079e9a3a50f"
+  },
+  "id": "nT2s7oSieLezpaZS",
+  "tags": []
+}
